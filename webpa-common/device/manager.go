@@ -359,13 +359,18 @@ func (m *manager) wrpSourceIsValid(message *wrp.Message, d *device) bool {
 }
 
 // nolint: typecheck
-func addDeviceMetadataContext(message *wrp.Message, deviceMetadata *Metadata) {
+func addDeviceMetadataContext(message *wrp.Message, deviceMetadata *Metadata, intermediateContext string) {
 	message.PartnerIDs = []string{deviceMetadata.PartnerIDClaim()}
 
 	// nolint: typecheck
 	if message.Type == wrp.SimpleEventMessageType {
 		message.SessionID = deviceMetadata.SessionID()
 	}
+
+	if message.Metadata == nil {
+		message.Metadata = make(map[string]string)
+	}
+	message.Metadata["/intermediate-context"] = intermediateContext
 }
 
 // readPump is the goroutine which handles the stream of WRP messages from a device.
@@ -436,7 +441,7 @@ func (m *manager) readPump(d *device, r ReadCloser, closeOnce *sync.Once) {
 			message.ContentType = DefaultWRPContentType
 		}
 
-		addDeviceMetadataContext(message, d.Metadata())
+		addDeviceMetadataContext(message, d.Metadata(), d.intermediateContext)
 
 		// nolint: typecheck
 		if message.Type == wrp.SimpleRequestResponseMessageType {
