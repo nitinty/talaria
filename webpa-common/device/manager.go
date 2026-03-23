@@ -368,6 +368,7 @@ func addDeviceMetadataContext(message *wrp.Message, deviceMetadata *Metadata, in
 	}
 
 	if intermediateContext != "" {
+
 		if message.Metadata == nil {
 			message.Metadata = make(map[string]string)
 		}
