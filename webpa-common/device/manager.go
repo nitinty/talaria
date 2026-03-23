@@ -367,10 +367,12 @@ func addDeviceMetadataContext(message *wrp.Message, deviceMetadata *Metadata, in
 		message.SessionID = deviceMetadata.SessionID()
 	}
 
-	if message.Metadata == nil {
-		message.Metadata = make(map[string]string)
+	if intermediateContext != "" {
+		if message.Metadata == nil {
+			message.Metadata = make(map[string]string)
+		}
+		message.Metadata["/intermediate-context"] = intermediateContext
 	}
-	message.Metadata["/intermediate-context"] = intermediateContext
 }
 
 // readPump is the goroutine which handles the stream of WRP messages from a device.
