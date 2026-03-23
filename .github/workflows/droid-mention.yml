@@ -1,0 +1,40 @@
+name: Droid Mention
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  droid-mention:
+    if: >
+      contains(github.event.comment.body, '@droid') ||
+      contains(github.event.review.body, '@droid') ||
+      contains(github.event.issue.body, '@droid') ||
+      contains(github.event.issue.title, '@droid')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Run Droid
+        uses: Factory-AI/droid-action@v3
+        with:
+          factory_api_key: ${{ secrets.FACTORY_API_KEY }}
